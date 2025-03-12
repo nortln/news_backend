@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="news-detail">
+    <h1>{{ news.title }}</h1>
+    <img src="{{ news.image.url }}" alt="{{ news.title }}" class="img-fluid mb-3">
+    <div class="news-meta mb-3">
+        <span class="badge bg-secondary">Views: {{ news.views }}</span>
+        <span class="badge bg-success">Likes: {{ likes_count }}</span>
+        <span class="badge bg-info">Published: {{ news.created_at|date:"M d, Y" }}</span>
+    </div>
+    <div class="news-content">
+        {{ news.content|linebreaks }}
+    </div>
+    <div class="tags mt-3">
+        {% for tag in news.tags.all %}
+            <a href="{% url 'news-by-tag' tag.name %}" class="badge bg-primary">{{ tag.name }}</a>
+        {% endfor %}
+    </div>
+    <button class="btn btn-primary mt-3 like-btn" data-news-id="{{ news.id }}">Like</button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    $('.like-btn').click(function() {
+        const newsId = $(this).data('news-id');
+        const likeBtn = $(this);
+        
+        $.ajax({
+            url: `/news/${newsId}/like/`,
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                if (response.success) {
+                    $('.badge.bg-success').text('Likes: ' + response.likes_count);
+                    likeBtn.prop('disabled', true).text('Liked');
+                }
+            },
+            error: function() {
+                alert('Error occurred while processing your like.');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

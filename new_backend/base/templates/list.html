@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .news-image {
+        width: 50%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 8px;
+        
+    }
+</style>
+
+<div class="news-container" data-next-page="2">
+    {% for news in page_obj %}
+    <div class="news-item mb-4">
+        <h2><a href="{{ news.get_absolute_url }}">{{ news.title }}</a></h2>
+        {% if news.image %}
+            <div class="image-container">
+                <img src="{{ news.image.url }}" alt="{{ news.title }}" class="news-image">
+            </div>
+        {% endif %}
+        <p>{{ news.content|truncatewords:50 }}</p>
+        <div class="news-meta">
+            <span class="badge bg-secondary">Views: {{ news.views }}</span>
+            <span class="badge bg-success">Likes: {{ news.likes.count }}</span>
+            <span class="badge bg-info">Published: {{ news.created_at|date:"M d, Y" }}</span>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div id="loading" style="display: none;">Loading more news...</div>
+
+<script src="{% static 'js/infinite_scroll.js' %}"></script>
+{% endblock %}
